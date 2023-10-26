@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="main.css">
+        <script src="main.js" defer></script>
+    </head>
+    <body>
+        <div id="container">
+            <div id="a">
+                <h1>Test rýchlosti reakcie</h1>
+                
+                <div>
+                    <button id="begin">Začať</button>
+                    <button id="reset">Reset</button>
+                </div>
+
+                <h2>Štatistiky</h2>
+                <p id="stats">
+                    Začnite hru pre zobrazenie štatistík
+                </p>
+                
+                <h2>Nastavenia</h2>
+                <div>
+                    <form id="configs">
+                        Povolené tvary:
+                        <div id="configs-shapes"></div>
+    
+                        <hr>
+                        
+                        <input name="colors" type="checkbox"> Náhodné farby
+                        
+                        <hr>
+    
+                        Počet zobrazení
+                        <input name="counter" type="number" min="0" placeholder="10">
+    
+                        <hr>
+    
+                        Dĺžka zobrazenia
+                        <input name="duration" type="number" min="0" placeholder="3">sek
+    
+                        <hr>
+    
+                        Interval pauzy
+                        <div>
+                            <input id="interval-min" name="interval" type="number" min="0" placeholder="0.5">
+                            -
+                            <input id="interval-max" name="interval" type="number" min="0" placeholder="2">sek
+                        </div>
+                    </form>
+                </div>
+
+                <div id="credits">
+                    <img src="https://github.com/favicon.ico" class="icon">
+                    <a href="https://github.com/Okmada">Github repo</a>
+                </div>
+            </div>
+            <div id="b">
+                <canvas id="tester"></canvas>
+            </div>
+          </div>
+    </body>
+</html>
