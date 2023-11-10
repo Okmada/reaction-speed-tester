@@ -35,8 +35,8 @@ function begin() {
     settings = new FormData(configs)
 
     points = [0, 0, 0];
-    times = [[], {}];
-    counter = settings.get("counter") || 10;
+    times = {};
+    counter = settings.get("counter");
 
     updateStats()
 
@@ -67,7 +67,7 @@ function end() {
 }
 
 function draw() {
-    var shape = shapes[Math.floor(Math.random() * shapes.length)];
+    shape = shapes[Math.floor(Math.random() * shapes.length)];
     var side = Math.min(width, height)
 
     var scale = getRandomInt(side/16, side/4),
@@ -84,7 +84,7 @@ function draw() {
     if (settings.getAll("shapes").includes(shape.getName())) {
         counter--
     } else {
-        timeout = setTimeout(redraw, settings.get("duration") * 1000 || 3000)
+        timeout = setTimeout(redraw, settings.get("duration") * 1000)
     }
 }
 
@@ -92,7 +92,7 @@ function redraw() {
     undraw()
 
     var interval = settings.getAll("interval")
-    timeout = setTimeout(draw, getRandomInt(interval[0] || 0.5, interval[1] || 2) * 1000)
+    timeout = setTimeout(draw, getRandomInt(interval[0], interval[1]) * 1000)
 }
 
 function undraw() {
@@ -114,11 +114,10 @@ function press() {
 
             var time = Date.now() - timer;
 
-            if (!times[1][shape.getName()]) {
-                times[1][shape.getName()] = []
+            if (!times[shape.getName()]) {
+                times[shape.getName()] = []
             }
-            times[1][shape.getName()].push(time)
-            times[0].push(time)
+            times[shape.getName()].push(time)
 
             if (counter <= 0) {
                 end()
@@ -138,10 +137,10 @@ function updateStats() {
     out.push(`Zobrazenia ${counter} / ${settings.get("counter") || 10}`)
     out.push(`Dobré / Zlé / Mimo - ${points.join(" / ")}`)
     out.push(`Presnosť ${Math.round((points[0] /(points[0] + points[1]) || 0) * 1000) / 10} %`)
-    out.push(`Priemerný čas - ${average(times[0])} ms`)
+    out.push(`Priemerný čas - ${average(Object.keys(times).map((e) => { return times[e] }).flat())} ms`)
 
     out.push("\nČasy:")
-    for (var [key, item] of Object.entries(times[1])) {
+    for (var [key, item] of Object.entries(times)) {
         out.push(`- ${key} - ${average(item)} ms`)
     }
 
