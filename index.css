@@ -36,6 +36,8 @@ body {
     border: 1px solid black;
     padding: 5px;
     background-color: white;
+
+    margin: 20px 0;
 }
 
 #tester {
@@ -62,4 +64,6 @@ button {
 
 input[type="number"] {
     width: 8ch;
+    
+    margin: 0 3px;
 }

@@ -56,6 +56,10 @@ function reset() {
 }
 
 function end() {
+    console.log(settings)
+    console.log(points)
+    console.log(times)
+
     updateStats()
     reset()
 
@@ -63,15 +67,18 @@ function end() {
 }
 
 function draw() {
-    shape = shapes[Math.floor(Math.random() * shapes.length)];
+    var shape = shapes[Math.floor(Math.random() * shapes.length)];
+    var side = Math.min(width, height)
 
-    var scale = getRandomInt(100, 275),
+    var scale = getRandomInt(side/16, side/4),
         rotation = getRandomInt(0, 180);
 
     var x = getRandomInt(scale, width-scale),
         y = getRandomInt(scale, height-scale);
 
-    shape.draw(ctx, x, y, scale, rotation, "#000")
+    var color = settings.get("colors") ? `hsl(${getRandomInt(0, 360)}, 100%, ${getRandomInt(0, 85)}%)` : "#000"
+
+    shape.draw(ctx, x, y, scale, rotation, color)
     timer = Date.now()
 
     if (settings.getAll("shapes").includes(shape.getName())) {
@@ -332,7 +339,7 @@ function createTextSpan(text) {
 function generateConfig() {
     // DEFAULT VALIDATION
     validate = (e) => {
-        e.target.value = Math.max(e.target.value, e.target.min)
+        e.target.value = e.target.value ? Math.max(e.target.value, e.target.min) : e.target.default
     }
 
     // POVOLENE TVARY
@@ -373,32 +380,36 @@ function generateConfig() {
     configs.appendChild(document.createElement("hr"))
 
     // POCET ZOBRAZENI
-    configs.appendChild(createTextSpan("Počet zobrazení "))
+    configs.appendChild(createTextSpan("Počet zobrazení"))
 
     var input = document.createElement("input")
         input.name = "counter"
         input.type = "number"
-        input.min = 0
-        input.placeholder = "10"
 
+        input.min = 0
+        input.default = 10
+
+        input.value = input.default
         input.addEventListener("change", validate)
     configs.appendChild(input)
 
     configs.appendChild(document.createElement("hr"))
 
     // DLZKA ZOBRAZENIA
-    configs.appendChild(createTextSpan("Dĺžka zobrazenia "))
+    configs.appendChild(createTextSpan("Dĺžka zobrazenia"))
 
     var input = document.createElement("input")
         input.name = "duration"
         input.type = "number"
-        input.min = 0
-        input.placeholder = "3"
 
+        input.min = 0
+        input.default = 3
+
+        input.value = input.default
         input.addEventListener("change", validate)
     configs.appendChild(input)
 
-    configs.appendChild(createTextSpan(" sek"))
+    configs.appendChild(createTextSpan("sek"))
 
     configs.appendChild(document.createElement("hr"))
 
@@ -410,28 +421,33 @@ function generateConfig() {
         var interval_min = document.createElement("input")
             interval_min.name = "interval"
             interval_min.type = "number"
+
             interval_min.min = 0
-            interval_min.placeholder = "0.5"
+            interval_min.default = 0.5
+
+            interval_min.value = interval_min.default
+            interval_min.addEventListener("change", validate)
         div.appendChild(interval_min)
 
-        div.appendChild(createTextSpan(" - "))
+        div.appendChild(createTextSpan("-"))
 
         var interval_max = document.createElement("input")
             interval_max.name = "interval"
             interval_max.type = "number"
-            interval_max.min = 0
-            interval_max.placeholder = "2"
-        div.appendChild(interval_max)
 
-        interval_min.addEventListener("change", validate)
-        interval_max.addEventListener("change", validate)
+            interval_max.min = 0
+            interval_max.default = 2
+
+            interval_max.value = interval_max.default
+            interval_max.addEventListener("change", validate)
+        div.appendChild(interval_max)
 
         interval_min.addEventListener("change", (e) => {
             interval_max.min = interval_min.value
             interval_max.value = Math.max(interval_max.value, interval_max.min)
         })
 
-        div.appendChild(createTextSpan(" sek"))
+        div.appendChild(createTextSpan("sek"))
 
     configs.appendChild(div)
 }
