@@ -29,6 +29,7 @@ function begin() {
         reset()
         return;
     }
+    clear()
 
     button.innerText = "Reset"
 
@@ -48,21 +49,31 @@ function reset() {
     timeout = null;
 
     points = null;
-    times = null; 
-
-    undraw()
+    times = null;
 
     button.innerText = "Začať"
+
+    undraw()
 }
 
+var csv;
 function end() {
-    console.log(settings)
-    console.log(points)
-    console.log(times)
-
     updateStats()
-    reset()
 
+    csv = "data:text/csv;charset=utf-8,";
+    csv += points.map((e, i) => {
+        return`${["DOBRE", "ZLE", "MIMO"][i]}, ${e}` 
+    }).join(", ") + "\n"
+    Object.keys(times).forEach((key) => {
+        csv += `${key}, ${times[key].join(", ")}\n`
+    })
+
+    var downloadButton = document.createElement("button");
+        downloadButton.innerText = "Stiahnúť dáta"
+        downloadButton.addEventListener("click", () => {download(encodeURI(csv), `${getTimestamp()}.csv`)})
+    stats.prepend(downloadButton);
+
+    reset()
     writeText("Koniec testu")
 }
 
@@ -76,7 +87,7 @@ function draw() {
     var x = getRandomInt(scale, width-scale),
         y = getRandomInt(scale, height-scale);
 
-    var color = settings.get("colors") ? `hsl(${getRandomInt(0, 360)}, 100%, ${getRandomInt(0, 85)}%)` : "#000"
+    var color = settings.get("colors") ? `hsl(${getRandomInt(0, 360)}, 100%, ${80 * Math.sqrt(Math.random())}%)` : "#000"
 
     shape.draw(ctx, x, y, scale, rotation, color)
     timer = Date.now()
@@ -153,6 +164,25 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
+function download(url, name) {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    document.body.append(a)
+    a.click()
+    document.body.removeChild(a)
+}
+
+function getTimestamp() {
+    const date = new Date()
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day =`${date.getDate()}`.padStart(2, '0');
+    const hour = `${date.getHours()}`.padStart(2, '0');
+    const minute = `${date.getMinutes()}`.padStart(2, '0');
+    const second = `${date.getSeconds()}`.padStart(2, '0');
+    return `${year}-${month}-${day}_${hour}-${minute}-${second}`
+}
 
 function average(array) {
     if (!array.length) {
@@ -342,7 +372,7 @@ function generateConfig() {
     }
 
     // POVOLENE TVARY
-    configs.appendChild(createTextSpan("Povolené tvary:"))
+    configs.append(createTextSpan("Povolené tvary:"))
 
     let configs_shapes = document.createElement("div")
 
@@ -355,47 +385,45 @@ function generateConfig() {
             checkbox.type = "checkbox"
             checkbox.name = "shapes"
             checkbox.value = shapeName
-            // checkbox.checked = true
 
-        subdiv.appendChild(checkbox);
-        subdiv.appendChild(createTextSpan(shapeName))
+        subdiv.append(checkbox);
+        subdiv.append(createTextSpan(shapeName))
         
-        configs_shapes.appendChild(subdiv);
+        configs_shapes.append(subdiv);
     }
 
-    configs.appendChild(configs_shapes)
+    configs.append(configs_shapes)
 
-    configs.appendChild(document.createElement("hr"))
+    configs.append(document.createElement("hr"))
 
     // NAHODNE FARBY
     let checkbox = document.createElement("input")
         checkbox.type = "checkbox"
         checkbox.name = "colors"
-        // checkbox.checked = true
-    configs.appendChild(checkbox)
+    configs.append(checkbox)
 
-    configs.appendChild(createTextSpan("Náhodné farby"))
+    configs.append(createTextSpan("Náhodné farby"))
 
-    configs.appendChild(document.createElement("hr"))
+    configs.append(document.createElement("hr"))
 
     // POCET ZOBRAZENI
-    configs.appendChild(createTextSpan("Počet zobrazení"))
+    configs.append(createTextSpan("Počet zobrazení"))
 
     var input = document.createElement("input")
         input.name = "counter"
         input.type = "number"
 
-        input.min = 0
+        input.min = 1
         input.default = 10
 
         input.value = input.default
         input.addEventListener("change", validate)
-    configs.appendChild(input)
+    configs.append(input)
 
-    configs.appendChild(document.createElement("hr"))
+    configs.append(document.createElement("hr"))
 
     // DLZKA ZOBRAZENIA
-    configs.appendChild(createTextSpan("Dĺžka zobrazenia"))
+    configs.append(createTextSpan("Dĺžka zobrazenia"))
 
     var input = document.createElement("input")
         input.name = "duration"
@@ -406,14 +434,14 @@ function generateConfig() {
 
         input.value = input.default
         input.addEventListener("change", validate)
-    configs.appendChild(input)
+    configs.append(input)
 
-    configs.appendChild(createTextSpan("sek"))
+    configs.append(createTextSpan("sek"))
 
-    configs.appendChild(document.createElement("hr"))
+    configs.append(document.createElement("hr"))
 
     // INTERVAL PAUZY
-    configs.appendChild(createTextSpan("Interval pauzy"))
+    configs.append(createTextSpan("Interval pauzy"))
 
     var div = document.createElement("div")
 
@@ -426,9 +454,9 @@ function generateConfig() {
 
             interval_min.value = interval_min.default
             interval_min.addEventListener("change", validate)
-        div.appendChild(interval_min)
+        div.append(interval_min)
 
-        div.appendChild(createTextSpan("-"))
+        div.append(createTextSpan("-"))
 
         var interval_max = document.createElement("input")
             interval_max.name = "interval"
@@ -439,14 +467,14 @@ function generateConfig() {
 
             interval_max.value = interval_max.default
             interval_max.addEventListener("change", validate)
-        div.appendChild(interval_max)
+        div.append(interval_max)
 
         interval_min.addEventListener("change", (e) => {
             interval_max.min = interval_min.value
             interval_max.value = Math.max(interval_max.value, interval_max.min)
         })
 
-        div.appendChild(createTextSpan("sek"))
+        div.append(createTextSpan("sek"))
 
-    configs.appendChild(div)
+    configs.append(div)
 }
