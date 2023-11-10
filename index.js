@@ -1,6 +1,6 @@
 console.log("Loaded")
 
-var canvas, ctx, stats, configs;
+var canvas, ctx, stats, configs, button;
 window.addEventListener('load', () => {
     console.log("After load")
 
@@ -14,21 +14,23 @@ window.addEventListener('load', () => {
     canvas.addEventListener('touchstart', press);
     document.body.onkeydown = function(e) { if (e.key == " " || e.code == "Space" || e.keyCode == 32) press() }
 
-    document.getElementById("begin").addEventListener("click", begin)
-    document.getElementById("reset").addEventListener("click", reset)
+    button = document.getElementById("button")
+    button.addEventListener("click", begin)
 
     window.addEventListener('resize', resize);
     resize()
 
-    generateConfigShapes()
-    intervalConfig()
+    generateConfig()
 });
 
 var timeout, counter, timer, shape, points, times, settings;
 function begin() {
     if (timeout) {
+        reset()
         return;
     }
+
+    button.innerText = "Reset"
 
     settings = new FormData(configs)
 
@@ -41,11 +43,6 @@ function begin() {
     timeout = setTimeout(draw, 2000);
 }
 
-function end() {
-    updateStats()
-    reset()
-}
-
 function reset() {
     clearTimeout(timeout);
     timeout = null;
@@ -54,6 +51,15 @@ function reset() {
     times = null; 
 
     undraw()
+
+    button.innerText = "Začať"
+}
+
+function end() {
+    updateStats()
+    reset()
+
+    writeText("Koniec testu")
 }
 
 function draw() {
@@ -169,6 +175,15 @@ function background() {
 function clear() {
     ctx.clearRect(0, 0, width, height)
     background()
+}
+
+function writeText(text) {
+    clear()
+
+    ctx.fillStyle = '#000000';
+    ctx.font = "100px serif";
+    ctx.textAlign = "center";
+    ctx.fillText(text, width/2, height/2)
 }
 
 class Shape {
@@ -308,8 +323,22 @@ const shapes = [
     new Hexagon(),
 ];
 
-function generateConfigShapes() {
-    let div = document.getElementById("configs-shapes")
+function createTextSpan(text) {
+    let span = document.createElement("span")
+    span.textContent = text
+    return span
+}
+
+function generateConfig() {
+    // DEFAULT VALIDATION
+    validate = (e) => {
+        e.target.value = Math.max(e.target.value, e.target.min)
+    }
+
+    // POVOLENE TVARY
+    configs.appendChild(createTextSpan("Povolené tvary:"))
+
+    let configs_shapes = document.createElement("div")
 
     for (let shape of shapes) {
         shapeName = shape.getName()
@@ -317,34 +346,92 @@ function generateConfigShapes() {
         let subdiv = document.createElement("div")
 
         let checkbox = document.createElement("input")
-        checkbox.type = "checkbox"
-        checkbox.name = "shapes"
-        checkbox.value = shapeName
-        // checkbox.checked = true
-
-        let text = document.createElement("span");
-        text.textContent = shapeName;
+            checkbox.type = "checkbox"
+            checkbox.name = "shapes"
+            checkbox.value = shapeName
+            // checkbox.checked = true
 
         subdiv.appendChild(checkbox);
-        subdiv.appendChild(text)
+        subdiv.appendChild(createTextSpan(shapeName))
         
-        div.appendChild(subdiv);
-    }
-}
-
-function intervalConfig() {
-    var intervalMin = document.getElementById("interval-min")
-    var intervalMax = document.getElementById("interval-max")
-
-    validate = (e) => {
-        e.target.value = Math.max(e.target.value, e.target.min)
+        configs_shapes.appendChild(subdiv);
     }
 
-    intervalMin.addEventListener("change", validate)
-    intervalMax.addEventListener("change", validate)
+    configs.appendChild(configs_shapes)
 
-    intervalMin.addEventListener("change", (e) => {
-        intervalMax.min = intervalMin.value
-        intervalMax.value = Math.max(intervalMax.value, intervalMax.min)
-    })
+    configs.appendChild(document.createElement("hr"))
+
+    // NAHODNE FARBY
+    let checkbox = document.createElement("input")
+        checkbox.type = "checkbox"
+        checkbox.name = "colors"
+        // checkbox.checked = true
+    configs.appendChild(checkbox)
+
+    configs.appendChild(createTextSpan("Náhodné farby"))
+
+    configs.appendChild(document.createElement("hr"))
+
+    // POCET ZOBRAZENI
+    configs.appendChild(createTextSpan("Počet zobrazení "))
+
+    var input = document.createElement("input")
+        input.name = "counter"
+        input.type = "number"
+        input.min = 0
+        input.placeholder = "10"
+
+        input.addEventListener("change", validate)
+    configs.appendChild(input)
+
+    configs.appendChild(document.createElement("hr"))
+
+    // DLZKA ZOBRAZENIA
+    configs.appendChild(createTextSpan("Dĺžka zobrazenia "))
+
+    var input = document.createElement("input")
+        input.name = "duration"
+        input.type = "number"
+        input.min = 0
+        input.placeholder = "3"
+
+        input.addEventListener("change", validate)
+    configs.appendChild(input)
+
+    configs.appendChild(createTextSpan(" sek"))
+
+    configs.appendChild(document.createElement("hr"))
+
+    // INTERVAL PAUZY
+    configs.appendChild(createTextSpan("Interval pauzy"))
+
+    var div = document.createElement("div")
+
+        var interval_min = document.createElement("input")
+            interval_min.name = "interval"
+            interval_min.type = "number"
+            interval_min.min = 0
+            interval_min.placeholder = "0.5"
+        div.appendChild(interval_min)
+
+        div.appendChild(createTextSpan(" - "))
+
+        var interval_max = document.createElement("input")
+            interval_max.name = "interval"
+            interval_max.type = "number"
+            interval_max.min = 0
+            interval_max.placeholder = "2"
+        div.appendChild(interval_max)
+
+        interval_min.addEventListener("change", validate)
+        interval_max.addEventListener("change", validate)
+
+        interval_min.addEventListener("change", (e) => {
+            interval_max.min = interval_min.value
+            interval_max.value = Math.max(interval_max.value, interval_max.min)
+        })
+
+        div.appendChild(createTextSpan(" sek"))
+
+    configs.appendChild(div)
 }

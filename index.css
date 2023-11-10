@@ -56,8 +56,8 @@ body {
 }
 
 button {
-    width: 50%;
-    float: left;
+    width: 100%;
+    padding: 5px;
 }
 
 input[type="number"] {
