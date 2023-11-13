@@ -12,8 +12,13 @@ window.addEventListener('load', () => {
 
     canvas.addEventListener('mousedown', press);
     canvas.addEventListener('touchstart', press);
-    document.body.onkeydown = function(e) { if (e.key == " " || e.code == "Space" || e.keyCode == 32) press() }
-
+    document.body.addEventListener("keydown", function(e) {
+        if (e.key == " " || e.code == "Space" || e.keyCode == 32) {
+            press() 
+            e.preventDefault()
+        }
+    });
+    
     button = document.getElementById("button")
     button.addEventListener("click", begin)
 
